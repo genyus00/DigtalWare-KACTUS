@@ -43,3 +43,82 @@ WXP → Base de datos (PostgreSQL)
 W7 → WXP (DCOM)
 W7 → W10 (API .NET:8084)
 
+**ServidorDatos (Backend - DTokyo)**
+El proyecto cuenta con un Servidor de Datos llamado ServidorDatos, que actúa como backend de la aplicación DTokyo y se conecta a la base de datos PostgreSQL.
+Archivo de Configuración
+
+La conexión a la base de datos se configura mediante el archivo FDConnection1.Params, ubicado en la misma carpeta que el ejecutable del servidor.
+
+Ejemplo de contenido:
+
+DriverID=PG
+Port=5432
+Server=127.0.0.1
+Password=Asdf1234$
+Database=DBDW_Test
+User_Name=postgres
+
+Este archivo define:
+- DriverID: Tipo de base de datos (PG para PostgreSQL)
+- Port: Puerto de conexión (por defecto 5432)
+- Server: Dirección del servidor de base de datos (127.0.0.1 para local)
+- Database: Nombre de la base de datos
+- User_Name y Password: Credenciales de acceso
+
+Registro del Servidor DCOM
+Para que ServidorDatos funcione correctamente como servidor DCOM, debe ser registrado en Windows. Esto se realiza mediante el archivo RegistrarServidor.bat, que se encuentra en la misma carpeta que el ejecutable.
+- El script RegistrarServidor.bat permite:
+- Registrar el servidor (/regserver)
+- Desregistrar el servidor (/unregserver)
+
+Funcionamiento del script
+@echo off
+echo =========================================
+echo Registro / Desregistro de Servidor DCOM
+echo =========================================
+
+REM Definir ruta del ejecutable en la misma carpeta que el .bat
+set exePath="%~dp0ServidorDatos.exe"
+
+REM Verificar que el archivo existe
+if not exist %exePath% (
+    echo ERROR: No se encontro el archivo %exePath%
+    pause
+    exit /b
+)
+
+REM Preguntar acción
+echo.
+echo Seleccione una opcion:
+echo 1 - Registrar servidor
+echo 2 - Desregistrar servidor
+set /p opcion=Ingrese opcion (1 o 2): 
+
+REM Evaluar opción
+if "%opcion%"=="1" (
+    echo Registrando servidor...
+    %exePath% /regserver
+    echo Servidor registrado.
+) else (
+    if "%opcion%"=="2" (
+        echo Desregistrando servidor...
+        %exePath% /unregserver
+        echo Servidor desregistrado.
+    ) else (
+        echo Opcion invalida.
+    )
+)
+pause
+
+
+Al ejecutar el script, se solicitará seleccionar Registrar o Desregistrar el servidor.
+El registro es necesario para que los clientes DCOM puedan conectarse a ServidorDatos.
+Archivos requeridos en la misma carpeta
+Para que el servidor funcione correctamente, la carpeta debe contener:
+- ServidorDatos.exe → Ejecutable del servidor DCOM
+- FDConnection1.Params → Configuración de conexión a la base de datos
+- RegistrarServidor.bat → Script para registrar/desregistrar el servidor
+- libpq.dll → Librería de PostgreSQL necesaria
+- midas.dll → Librería de soporte para Delphi/C++ Builder
+
+
