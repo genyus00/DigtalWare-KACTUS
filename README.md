@@ -121,4 +121,101 @@ Para que el servidor funcione correctamente, la carpeta debe contener:
 - libpq.dll → Librería de PostgreSQL necesaria
 - midas.dll → Librería de soporte para Delphi/C++ Builder
 
+**Cliente DCOM (Frontend - D2007)**
 
+La aplicación cliente Cliente DCOM actúa como frontend para interactuar con el ServidorDatos (backend DCOM) y consumir también la Web API .NET.
+Archivo de Configuración: params.ini
+
+El cliente utiliza un archivo params.ini para definir los parámetros de conexión al servidor DCOM y a la API web:
+
+[PARAMS]
+ComputerName=localhost
+ServerGUID={E807A848-27BB-4206-A6F3-728041D49D25}
+ServerName=ServidorDatos.ServidorDCOM
+
+[WEBAPI]
+url1='http://localhost:8084'
+url='http://192.168.5.101:8084'
+
+
+[PARAMS]
+ComputerName: Nombre del equipo donde está el servidor DCOM (localhost si está en la misma máquina).
+ServerGUID: Identificador único del servidor DCOM.
+ServerName: Nombre del servidor DCOM expuesto.
+
+[WEBAPI]
+url1 y url: URLs donde la aplicación cliente puede consumir la API .NET.
+
+Para conectarse a un servidor DCOM que está en otro PC, se debe registrar la librería de tipos (ServidorDatos.tlb) en la máquina cliente.
+Registro de la Librería de Tipos (ServidorDatos.tlb)
+Se utiliza el script RegistrarTLB.bat para registrar o desregistrar la Type Library DCOM en la máquina cliente.
+
+Funcionamiento del script
+@echo off
+echo =========================================
+echo Registro / Desregistro de Type Library DCOM
+echo =========================================
+echo.
+
+REM Detectar arquitectura del sistema
+set "arch=x86"
+if defined ProgramFiles(x86) set "arch=x64"
+
+REM Ruta del TLB en la misma carpeta que el .bat
+set "tlbPath=%~dp0ServidorDatos.tlb"
+
+REM Verificar que el archivo existe
+if not exist "%tlbPath%" (
+    echo ERROR: No se encontro el archivo "%tlbPath%"
+    pause
+    exit /b
+)
+
+REM Usar regtlibv12.exe según arquitectura
+if "%arch%"=="x64" (
+    set "regtlibPath=C:\Windows\Microsoft.NET\Framework64\v4.0.30319\regtlibv12.exe"
+) else (
+    set "regtlibPath=C:\Windows\Microsoft.NET\Framework\v4.0.30319\regtlibv12.exe"
+)
+
+REM Verificar existencia de regtlibv12.exe
+if not exist "%regtlibPath%" (
+    echo ERROR: No se encontro regtlibv12.exe en "%regtlibPath%"
+    pause
+    exit /b
+)
+
+echo.
+echo Seleccione una opcion:
+echo 1 - Registrar TLB
+echo 2 - Desregistrar TLB
+set /p "opcion=Ingrese opcion (1 o 2): "
+
+if "%opcion%"=="1" (
+    echo Registrando libreria de tipos...
+    "%regtlibPath%" "%tlbPath%"
+    echo Registro completado.
+) else if "%opcion%"=="2" (
+    echo Desregistrando libreria de tipos...
+    "%regtlibPath%" /u "%tlbPath%"
+    echo Desregistro completado.
+) else (
+    echo Opcion invalida.
+)
+
+echo.
+pause
+
+
+Detecta la arquitectura del sistema (x86 / x64) y utiliza la versión correcta de regtlibv12.exe.
+Permite registrar o desregistrar la librería de tipos necesaria para conectarse al servidor DCOM remoto.
+
+Archivos requeridos en la misma carpeta
+Para que el Cliente DCOM funcione correctamente, la carpeta debe contener:
+- AppCliente.exe → Ejecutable del cliente
+- Params.ini → Configuración de conexión a servidor DCOM y Web API
+- RegistrarTLB.bat → Script para registrar/desregistrar la librería de tipos
+- ServidorDatos.tlb → Librería de tipos DCOM
+- libpq.dll → Librería de PostgreSQL
+- midas.dll → Librería de soporte Delphi/C++ Builder
+- regtlibv12.exe → Utilidad para registrar la TLB (si no está en el sistema, el script indica la ruta correcta)
