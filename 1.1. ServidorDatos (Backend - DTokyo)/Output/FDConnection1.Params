@@ -1,0 +1,6 @@
+DriverID=PG
+Port=5432
+Server=127.0.0.1
+Password=Asdf1234$
+Database=DBDW_Test
+User_Name=postgres
