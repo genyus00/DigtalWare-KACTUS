@@ -1,0 +1,78 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "WebNetAPI",
+    "version": "1.0"
+  },
+  "paths": {
+    "/clientes": {
+      "post": {
+        "tags": [
+          "WebNetAPI"
+        ],
+        "operationId": "CreateCliente",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ClienteCreateDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/facturas/{numero}": {
+      "get": {
+        "tags": [
+          "WebNetAPI"
+        ],
+        "operationId": "GetFactura",
+        "parameters": [
+          {
+            "name": "numero",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ClienteCreateDto": {
+        "type": "object",
+        "properties": {
+          "clienteId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "nombreCliente": {
+            "type": "string",
+            "nullable": true
+          },
+          "direccion": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  }
+}
