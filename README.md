@@ -219,3 +219,46 @@ Para que el Cliente DCOM funcione correctamente, la carpeta debe contener:
 - libpq.dll → Librería de PostgreSQL
 - midas.dll → Librería de soporte Delphi/C++ Builder
 - regtlibv12.exe → Utilidad para registrar la TLB (si no está en el sistema, el script indica la ruta correcta)
+
+**Información de despliegue y conexión del servidor .NET y cliente Delphi**
+**1. Publicación del servidor .NET**
+
+Los archivos publicados del proyecto .NET Server WebAPI deben copiarse en la carpeta:
+NetServerWebAPI
+
+Dentro de esta carpeta se encuentra el ejecutable principal:
+WebNetAPI.exe
+
+Este ejecutable es el que debe ejecutarse en el PC Servidor para levantar la API.
+El servicio se expone por HTTP en el puerto 8084.
+Ejemplo de URL base:
+
+http://<IP_Servidor>:8084/
+
+**2. Conexión desde el cliente Delphi 2007**
+El cliente desarrollado en Delphi 2007 (D2007) requiere conocer la URL base del servicio para poder consumir la API.
+La URL se debe parametrizar en el archivo de configuración:
+
+params.ini
+
+Ejemplo de configuración en params.ini:
+
+[Servidor]
+URL=http://192.168.1.100:8084
+
+**3. Restricciones de Delphi con HTTPS**
+
+Delphi 2007 tiene limitaciones al consumir servicios bajo HTTPS (TLS/SSL) debido a:
+- Falta de soporte nativo para protocolos modernos de seguridad (TLS 1.2/1.3).
+- Dependencia de librerías antiguas (WinInet/Indy) que no soportan certificados actuales sin modificaciones adicionales.
+- Problemas de compatibilidad con certificados autofirmados o no reconocidos.
+- Por esta razón, el cliente se conecta usando HTTP (puerto 8084) en lugar de HTTPS.
+
+4. Consideraciones adicionales
+Si en un futuro se requiere migrar a HTTPS, se deberán evaluar opciones como:
+- Actualizar las librerías de red en Delphi (ej. Indy actualizadas).
+- Usar un proxy inverso (NGINX, Apache o IIS) que exponga el servicio en HTTPS y mantenga comunicación HTTP interna con el servidor .NET en puerto 8084.
+- Migrar el cliente Delphi a una versión más reciente con soporte TLS moderno.
+
+
+
