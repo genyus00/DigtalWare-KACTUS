@@ -60,35 +60,61 @@ Este proyecto implementa un **CRUD de clientes** y un **módulo de facturación*
 - **Productos** (productoId, nombreProducto, valor)  
 - **Detalle_Factura** (numero, productoId, cantidad, valor)  
 
-### Script ejemplo
+### Script
 
 ```sql
-CREATE TABLE clientes (
-    cliente INT PRIMARY KEY,
-    nombre_cliente VARCHAR(100),
-    direccion VARCHAR(200)
-);
+CREATE TABLE public.clientes (
+  cliente INTEGER NOT NULL,
+  nombre_cliente VARCHAR(150),
+  direccion VARCHAR(150),
+  CONSTRAINT clientes_pkey PRIMARY KEY(cliente)
+) 
+WITH (oids = false);
 
-CREATE TABLE cabeza_factura (
-    numero INT PRIMARY KEY,
-    fecha TIMESTAMP,
-    cliente INT REFERENCES clientes(cliente),
-    total NUMERIC
-);
+CREATE TABLE public.cabeza_factura (
+  numero INTEGER NOT NULL,
+  fecha DATE DEFAULT 'now'::text::date,
+  cliente INTEGER NOT NULL,
+  total DOUBLE PRECISION,
+  CONSTRAINT cabeza_factura_idx PRIMARY KEY(numero, cliente),
+  CONSTRAINT cabeza_factura_fk FOREIGN KEY (cliente)
+    REFERENCES public.clientes(cliente)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE
+    NOT DEFERRABLE
+) 
+WITH (oids = false);
 
-CREATE TABLE productos (
-    producto INT PRIMARY KEY,
-    nombre_producto VARCHAR(100),
-    valor NUMERIC
-);
+CREATE UNIQUE INDEX cabeza_factura_numero_key ON public.cabeza_factura
+  USING btree (numero);
 
-CREATE TABLE detalle_factura (
-    numero INT REFERENCES cabeza_factura(numero),
-    producto INT REFERENCES productos(producto),
-    cantidad INT,
-    valor NUMERIC,
-    PRIMARY KEY (numero, producto)
-);
+CREATE TABLE public.productos (
+  producto INTEGER NOT NULL,
+  nombre_producto VARCHAR(100) NOT NULL,
+  valor DOUBLE PRECISION,
+  CONSTRAINT product_product_id_key UNIQUE(nombre_producto),
+  CONSTRAINT productos_nombre_uq PRIMARY KEY(producto)
+) 
+WITH (oids = false);
+
+CREATE TABLE public.detalle_factura (
+  numero INTEGER NOT NULL,
+  producto INTEGER NOT NULL,
+  cantidad INTEGER,
+  valor DOUBLE PRECISION,
+  CONSTRAINT cliente_product_pkey PRIMARY KEY(numero, producto),
+  CONSTRAINT detalle_factura_fk FOREIGN KEY (numero)
+    REFERENCES public.cabeza_factura(numero)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE
+    NOT DEFERRABLE,
+  CONSTRAINT detalle_factura_fk1 FOREIGN KEY (producto)
+    REFERENCES public.productos(producto)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE
+    NOT DEFERRABLE
+) 
+WITH (oids = false);
 ```
 
 ---
