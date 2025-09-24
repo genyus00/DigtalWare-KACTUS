@@ -91,7 +91,6 @@ CREATE TABLE detalle_factura (
 );
 ```
 
-
 ---
 
 # API .NET (C# Minimal API) + Cliente Delphi
@@ -121,11 +120,11 @@ CREATE TABLE detalle_factura (
 }
 ```
 
-### 🔹 Obtener Factura por Número  
+### Obtener Factura por Número  
 
 **GET** `/facturas/{numero}`  
 
-📤 **Respuesta de ejemplo:**
+**Respuesta de ejemplo:**
 
 ```json
 {
@@ -158,22 +157,130 @@ CREATE TABLE detalle_factura (
 }
 ```
 
-🖥️ Cliente Delphi
-Funcionalidad
+## Cliente Delphi  
 
-Consulta facturas desde la API (IdHTTP + SuperObject).
+El cliente está desarrollado en **Delphi 2007**, originalmente para conectarse vía **DCOM** al servidor legado en XP, y extendido para consumir también la **API REST** expuesta en el host W10.  
 
-Muestra cabecera en cdsFactura.
+---
 
-Lista de detalles en cdsDetalle.
+### Funcionalidad
+- Consulta facturas y registra clientes desde la **API .NET** usando `IdHTTP + SuperObject`.  
+- Consumo de servicios vía **DCOM** con `TDCOMConnection` y `TClientDataSet`.  
+- Manejo de datasets locales (`cdsClientes`, `cdsProductos`, `cdsFacturas`, `cdsDetalle_Factura`).  
+- Control de errores y logging centralizado en el `DataModule`.  
 
-Casos soportados
-Escenario en API	Resultado en Delphi
-Factura no existe (404)	Muestra mensaje de error.
-Factura sin detalles	cdsDetalle vacío.
-Detalle sin producto	Campo Producto = 'N/A'.
-Cliente nulo	Campos cliente vacíos.
+---
 
+### Conexiones soportadas
+#### **DCOM (legado)**
+- Conecta con `ServidorDatos.exe` en la VM XP.  
+- Requiere `midas.dll` y `libpq.dll` en el cliente.  
+- Configuración en `params.ini`:
+  ```ini
+  [PARAMS]
+  ComputerName=localhost
+  ServerGUID={E807A848-27BB-4206-A6F3-728041D49D25}
+  ServerName=ServidorDatos.ServidorDCOM
+  ```
+
+#### **API REST (nuevo)**
+  - Consulta facturas y registra clientes vía HTTP.
+  - Implementado con **Indy (IdHTTP)** + **SuperObject**.
+  - Configuración en `params.ini`:
+    ```ini
+    [WEBAPI]
+    url=http://192.168.5.101:8084
+    ```
+---
+
+### Flujo de conexión (DCOM)
+
+1. **Configuración inicial**  
+   - Se lee `Params.ini` para obtener:  
+     - `ComputerName` (host del servidor XP).  
+     - `ServerName` y `ServerGUID`.  
+
+2. **DataModule (uDatamodule.pas)**  
+   - Implementa conexión segura con logging (`LogLines`).  
+   - Métodos principales:  
+     - `ConectarServidor / DesconectarServidor`  
+     - `AbrirCDS(cds, Nombre)`  
+     - `GuardarCambios(cds, Nombre)`  
+     - `ExisteFacturaConNumero(numero)`  
+
+3. **Errores comunes tratados**  
+   - Duplicación de claves primarias.  
+   - Violación de integridad referencial.  
+   - Eliminación de registros con dependencias.  
+   - Factura con número duplicado (valida en dataset + BD).  
+
+---
+
+### Formularios principal (Acceso)
+- **`uFrmPrincipal.pas`**
+
+### Formularios principales (DCOM)
+- **`uFrmClientes.pas`**
+- **`ufrmFactura.pas`**
+- **`ufrmProductos.pas`**
+- **`ufrmRegFactura.pas`**
+
+### Formularios principales (API REST)
+- **`ufrmViewFactura.pas`**
+  - Botón **Consultar Factura** (`BtnGetFactura`).
+  - Ejecuta `GET /facturas/{id}` contra la API.
+  - Respuesta JSON se parsea con **SuperObject**.
+  - Los datos se cargan en `cdsFactura` (cabecera) y `cdsDetalle` (productos).
+
+- **`ufrmClienteAPI.pas`**
+  - Formulario para registro de clientes.
+  - Botón **Crear Cliente** (`BtnCrearCliente`).
+  - Ejecuta `POST /clientes` enviando JSON con:
+    ```json
+    {
+      "ClienteId": 1,
+      "NombreCliente": "ACME S.A.",
+      "Direccion": "Calle 123"
+    }
+    ```
+  - Muestra en pantalla el resultado según `codError`, `message` o `errorMsg`.
+
+---
+
+### Librerías requeridas
+- **Indy** (`IdHTTP`, `IdSSL`).
+- **SuperObject** (manejo de JSON).
+- **midas.dll** y **libpq.dll** (para compatibilidad DCOM/DataSnap).
+
+---
+
+### Casos soportados (API y DCOM)
+
+| Escenario en API/DCOM         | Resultado en Delphi |
+|-------------------------------|---------------------|
+| Factura no existe (`404` / no encontrada en BD) | Mensaje de error. |
+| Factura sin detalles          | `cdsDetalle` vacío. |
+| Detalle sin producto          | Campo **Producto = 'N/A'**. |
+| Cliente nulo                  | Campos cliente vacíos. |
+| Número de factura duplicado   | Mensaje de validación y aborta inserción. |
+
+---
+
+### Logging  
+
+Cada acción relevante se registra en memoria (`TStringList`).  
+
+#### Ejemplo de log
+```text
+[2025-09-24 10:30:15] Conectado a Servidor DCOM en localhost  
+[2025-09-24 10:31:02] GET /facturas/123 → OK  
+[2025-09-24 10:31:05] POST /clientes → Cliente ACME S.A. creado  
+```
+
+## De esta forma el cliente Delphi puede:
+- Seguir usando **DCOM** para compatibilidad con el servidor XP.
+- O consumir la **API REST** en W10 para nuevas integraciones.
+ 
 ---
 
 ## Infraestructura y despliegue  
@@ -208,13 +315,10 @@ url=http://192.168.5.101:8084
 ---
 
 ## Consideraciones de seguridad  
-
-- Cliente **Delphi 2007** tiene limitaciones con **HTTPS** (TLS moderno no soportado).  
-- Actualmente se trabaja en **HTTP (puerto 8084)**.  
-
-Para usar **HTTPS** se recomienda:  
-- Configurar un **proxy inverso** (NGINX / Apache / IIS).  
-- Migrar a **Delphi más reciente** con soporte TLS 1.2/1.3.  
+- Actualmente se usa **HTTP plano (puerto 8084)**: Delphi 2007 no soporta TLS moderno.
+- Para HTTPS se recomienda:
+  - Configurar **Proxy inverso** (NGINX / Apache / IIS).
+  - Migrar a **Delphi más reciente** con soporte TLS 1.2/1.3.
 
 ---
 
