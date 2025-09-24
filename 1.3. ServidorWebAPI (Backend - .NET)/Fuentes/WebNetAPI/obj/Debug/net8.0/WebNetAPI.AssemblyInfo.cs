@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("WebNetAPI")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+ef397501b18d30ae43d93debe2ce43f9d7b68408")]
 [assembly: System.Reflection.AssemblyProductAttribute("WebNetAPI")]
 [assembly: System.Reflection.AssemblyTitleAttribute("WebNetAPI")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

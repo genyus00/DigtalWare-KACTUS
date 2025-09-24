@@ -7,7 +7,7 @@ var builder = WebApplication.CreateBuilder(args);
 // ========================= CONFIGURACIÓN DEL SERVIDOR =========================
 
 // Habilitar Kestrel para HTTP y HTTPS
-// Esto permite que Delphi Tokyo use HTTP local sin problemas de SSL
+// Esto permite que Delphi Delphi 2007 use HTTP local sin problemas de SSL
 builder.WebHost.ConfigureKestrel(options =>
 {
     options.ListenAnyIP(8084);       // HTTP para pruebas locales : ya no se ve swagger
@@ -41,7 +41,7 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();    // Activa Swagger solo en entorno desarrollo
     app.UseSwaggerUI();  // Activa la interfaz Swagger UI
-    // No redirigir a HTTPS en desarrollo, permite que Delphi Tokyo use HTTP
+    // No redirigir a HTTPS en desarrollo, permite que Delphi Delphi 2007 use HTTP
 }
 else
 {
