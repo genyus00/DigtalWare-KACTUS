@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "D:\\1T Delphi\\Proyectos de Software\\DigitalWare\\1.3. ServidorWebAPI (Backend - .NET)\\Fuentes\\WebNetAPI\\WebNetAPI.csproj": {}
+    "D:\\DigitalWare\\1.3. ServidorWebAPI (Backend - .NET)\\Fuentes\\WebNetAPI\\WebNetAPI.csproj": {}
   },
   "projects": {
-    "D:\\1T Delphi\\Proyectos de Software\\DigitalWare\\1.3. ServidorWebAPI (Backend - .NET)\\Fuentes\\WebNetAPI\\WebNetAPI.csproj": {
+    "D:\\DigitalWare\\1.3. ServidorWebAPI (Backend - .NET)\\Fuentes\\WebNetAPI\\WebNetAPI.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\1T Delphi\\Proyectos de Software\\DigitalWare\\1.3. ServidorWebAPI (Backend - .NET)\\Fuentes\\WebNetAPI\\WebNetAPI.csproj",
+        "projectUniqueName": "D:\\DigitalWare\\1.3. ServidorWebAPI (Backend - .NET)\\Fuentes\\WebNetAPI\\WebNetAPI.csproj",
         "projectName": "WebNetAPI",
-        "projectPath": "D:\\1T Delphi\\Proyectos de Software\\DigitalWare\\1.3. ServidorWebAPI (Backend - .NET)\\Fuentes\\WebNetAPI\\WebNetAPI.csproj",
+        "projectPath": "D:\\DigitalWare\\1.3. ServidorWebAPI (Backend - .NET)\\Fuentes\\WebNetAPI\\WebNetAPI.csproj",
         "packagesPath": "C:\\Users\\genyu\\.nuget\\packages\\",
-        "outputPath": "D:\\1T Delphi\\Proyectos de Software\\DigitalWare\\1.3. ServidorWebAPI (Backend - .NET)\\Fuentes\\WebNetAPI\\obj\\",
+        "outputPath": "D:\\DigitalWare\\1.3. ServidorWebAPI (Backend - .NET)\\Fuentes\\WebNetAPI\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "M:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
