@@ -5,7 +5,7 @@ Este proyecto implementa un **CRUD de clientes** y un **módulo de facturación*
 
 - **Aplicación Delphi (3 capas con DCOM)**  
 - **Servidor DCOM (Delphi DataSnap/RemObjects)**  
-- **API REST en .NET 7/8 (C# + PostgreSQL)**  
+- **API REST en .NET 8 (C# + PostgreSQL)**  
 - **Base de datos PostgreSQL**  
 
 ---
