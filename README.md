@@ -1,264 +1,96 @@
-# DigtalWare-KACTUS
-Prueba Técnica: Desarrollo Delphi KACTUS
+# DigitalWare - KACTUS  
+Prueba Técnica: Desarrollo en Delphi + API .NET
 
-CRUD Clientes. Manejo de base de datos.
-1. Crear las tablas del siguiente modelo entidad relación.
-2. Construir un programa que permita insertar, modificar, eliminar y consultar filas.
-Los siguientes puntos son un Plus para la prueba: (No son indispensables, pero de realizarlos genera puntos extra en el proceso de selección).
-3. El programa debe estar construido usando arquitectura de tres capas:
-∙ Presentación.
-∙ Lógica de Negocio.
-∙ Acceso a Datos.
-4. La capa de presentación puede estar construida como se desee (activeform, form, etc.).
-5. La capa de lógica debe implementarse usando datamodulo remoto (exe).
-6. Se debe usar protocolo DCOM para comunicar capa de presentación a capa de lógica.
-Datos de acceso a Base de Datos (si aplica):
-Servidor: 192.168.5.101
-Nombre BD: DBDW_Test
-Usuario: postgres
-Password: Asdf1234$
-7- Generar un servicio web (API REST) en .Net (C#) que contenga 2 endpoints el primero con verbo POST para crear registros sobre la tabla clientes y un segundo endpoint que permita Consultar los el detalle de factura
-8- Permitir la interacción entre el programa en Delphi y el servicio en .Net
+Este proyecto implementa un **CRUD de clientes** y un **módulo de facturación**, integrando:  
 
-**Elementos del diagrama:**
-* PC con Windows 10 (HOST)
-- Aplicación + Base de datos PostgreSQL
-- Servidor Web API .NET (exe) — escucha en puerto 8084
-- Se conecta a la base de datos local.
+- **Aplicación Delphi (3 capas con DCOM)**  
+- **Servidor DCOM (Delphi DataSnap/RemObjects)**  
+- **API REST en .NET 7/8 (C# + PostgreSQL)**  
+- **Base de datos PostgreSQL**  
 
-**VMWare: PC con Windows XP (servidor DCOM)**
-- IP: 192.168.5.103
-- Servidor DCOM
-- Se conecta a la base de datos (supongo que también a PostgreSQL en W10).
+---
 
-**VMWare: PC con Windows 7 (cliente)**
-- IP: 192.168.5.115
-- Aplicación cliente
-- Consume DCOM del XP
-- Consume API .NET del W10 (puerto 8084)
+## Objetivos de la prueba
 
-**Relaciones / Conexiones:**
-W10 → Base de datos (PostgreSQL)
-WXP → Base de datos (PostgreSQL)
-W7 → WXP (DCOM)
-W7 → W10 (API .NET:8084)
+1. Construir un CRUD de clientes en Delphi usando arquitectura en tres capas:  
+   - **Presentación** (forms/activeform).  
+   - **Lógica de Negocio** (DataModule remoto, ejecutable independiente).  
+   - **Acceso a Datos** (PostgreSQL).  
 
-**ServidorDatos (Backend - DTokyo)**
-El proyecto cuenta con un Servidor de Datos llamado ServidorDatos, que actúa como backend de la aplicación DTokyo y se conecta a la base de datos PostgreSQL.
-Archivo de Configuración
+2. Usar protocolo **DCOM** para la comunicación entre cliente y servidor de datos.  
 
-La conexión a la base de datos se configura mediante el archivo FDConnection1.Params, ubicado en la misma carpeta que el ejecutable del servidor.
+3. Generar una **API REST en .NET** que:  
+   - Permita crear clientes (**POST /clientes**).  
+   - Permita consultar facturas con su detalle y productos (**GET /facturas/{numero}**).  
 
-Ejemplo de contenido:
+4. Permitir la interacción entre el cliente Delphi y la API .NET.  
 
-DriverID=PG
-Port=5432
-Server=127.0.0.1
-Password=Asdf1234$
-Database=DBDW_Test
-User_Name=postgres
+---
 
-Este archivo define:
-- DriverID: Tipo de base de datos (PG para PostgreSQL)
-- Port: Puerto de conexión (por defecto 5432)
-- Server: Dirección del servidor de base de datos (127.0.0.1 para local)
-- Database: Nombre de la base de datos
-- User_Name y Password: Credenciales de acceso
+## Estructura del Proyecto
 
-Registro del Servidor DCOM
-Para que ServidorDatos funcione correctamente como servidor DCOM, debe ser registrado en Windows. Esto se realiza mediante el archivo RegistrarServidor.bat, que se encuentra en la misma carpeta que el ejecutable.
-- El script RegistrarServidor.bat permite:
-- Registrar el servidor (/regserver)
-- Desregistrar el servidor (/unregserver)
+```plaintext
+/api-net
+├── Program.cs              # Minimal API .NET
+├── Models/                 # Entidades EF Core
+├── Dtos/                   # DTOs de entrada/salida
+└── MyDbContext.cs          # Contexto EF Core para PostgreSQL
 
-Funcionamiento del script
-@echo off
-echo =========================================
-echo Registro / Desregistro de Servidor DCOM
-echo =========================================
+/servidor-dcom
+├── ServidorDatos.exe       # Servidor remoto DCOM
+├── FDConnection1.Params    # Config BD PostgreSQL
+├── RegistrarServidor.bat   # Registro / Desregistro DCOM
+├── libpq.dll, midas.dll    # Dependencias necesarias
 
-REM Definir ruta del ejecutable en la misma carpeta que el .bat
-set exePath="%~dp0ServidorDatos.exe"
+/cliente-delphi
+├── AppCliente.exe          # Cliente Delphi
+├── params.ini              # Config conexión DCOM + API
+├── RegistrarTLB.bat        # Registro librería TLB
+└── ServidorDatos.tlb       # Librería de tipos DCOM
+```
 
-REM Verificar que el archivo existe
-if not exist %exePath% (
-    echo ERROR: No se encontro el archivo %exePath%
-    pause
-    exit /b
-)
+---
 
-REM Preguntar acción
-echo.
-echo Seleccione una opcion:
-echo 1 - Registrar servidor
-echo 2 - Desregistrar servidor
-set /p opcion=Ingrese opcion (1 o 2): 
+## Base de Datos
 
-REM Evaluar opción
-if "%opcion%"=="1" (
-    echo Registrando servidor...
-    %exePath% /regserver
-    echo Servidor registrado.
-) else (
-    if "%opcion%"=="2" (
-        echo Desregistrando servidor...
-        %exePath% /unregserver
-        echo Servidor desregistrado.
-    ) else (
-        echo Opcion invalida.
-    )
-)
-pause
+### Modelo Entidad-Relación
 
+- **Clientes** (clienteId, nombreCliente, direccion)  
+- **Cabeza_Factura** (numero, fecha, clienteId, total)  
+- **Productos** (productoId, nombreProducto, valor)  
+- **Detalle_Factura** (numero, productoId, cantidad, valor)  
 
-Al ejecutar el script, se solicitará seleccionar Registrar o Desregistrar el servidor.
-El registro es necesario para que los clientes DCOM puedan conectarse a ServidorDatos.
-Archivos requeridos en la misma carpeta
-Para que el servidor funcione correctamente, la carpeta debe contener:
-- ServidorDatos.exe → Ejecutable del servidor DCOM
-- FDConnection1.Params → Configuración de conexión a la base de datos
-- RegistrarServidor.bat → Script para registrar/desregistrar el servidor
-- libpq.dll → Librería de PostgreSQL necesaria
-- midas.dll → Librería de soporte para Delphi/C++ Builder
+### Script ejemplo
 
-**Cliente DCOM (Frontend - D2007)**
+```sql
+CREATE TABLE clientes (
+    cliente INT PRIMARY KEY,
+    nombre_cliente VARCHAR(100),
+    direccion VARCHAR(200)
+);
 
-La aplicación cliente Cliente DCOM actúa como frontend para interactuar con el ServidorDatos (backend DCOM) y consumir también la Web API .NET.
-Archivo de Configuración: params.ini
+CREATE TABLE cabeza_factura (
+    numero INT PRIMARY KEY,
+    fecha TIMESTAMP,
+    cliente INT REFERENCES clientes(cliente),
+    total NUMERIC
+);
 
-El cliente utiliza un archivo params.ini para definir los parámetros de conexión al servidor DCOM y a la API web:
+CREATE TABLE productos (
+    producto INT PRIMARY KEY,
+    nombre_producto VARCHAR(100),
+    valor NUMERIC
+);
 
-[PARAMS]
-ComputerName=localhost
-ServerGUID={E807A848-27BB-4206-A6F3-728041D49D25}
-ServerName=ServidorDatos.ServidorDCOM
+CREATE TABLE detalle_factura (
+    numero INT REFERENCES cabeza_factura(numero),
+    producto INT REFERENCES productos(producto),
+    cantidad INT,
+    valor NUMERIC,
+    PRIMARY KEY (numero, producto)
+);
+```
 
-[WEBAPI]
-url1='http://localhost:8084'
-url='http://192.168.5.101:8084'
-
-
-[PARAMS]
-ComputerName: Nombre del equipo donde está el servidor DCOM (localhost si está en la misma máquina).
-ServerGUID: Identificador único del servidor DCOM.
-ServerName: Nombre del servidor DCOM expuesto.
-
-[WEBAPI]
-url1 y url: URLs donde la aplicación cliente puede consumir la API .NET.
-
-Para conectarse a un servidor DCOM que está en otro PC, se debe registrar la librería de tipos (ServidorDatos.tlb) en la máquina cliente.
-Registro de la Librería de Tipos (ServidorDatos.tlb)
-Se utiliza el script RegistrarTLB.bat para registrar o desregistrar la Type Library DCOM en la máquina cliente.
-
-Funcionamiento del script
-@echo off
-echo =========================================
-echo Registro / Desregistro de Type Library DCOM
-echo =========================================
-echo.
-
-REM Detectar arquitectura del sistema
-set "arch=x86"
-if defined ProgramFiles(x86) set "arch=x64"
-
-REM Ruta del TLB en la misma carpeta que el .bat
-set "tlbPath=%~dp0ServidorDatos.tlb"
-
-REM Verificar que el archivo existe
-if not exist "%tlbPath%" (
-    echo ERROR: No se encontro el archivo "%tlbPath%"
-    pause
-    exit /b
-)
-
-REM Usar regtlibv12.exe según arquitectura
-if "%arch%"=="x64" (
-    set "regtlibPath=C:\Windows\Microsoft.NET\Framework64\v4.0.30319\regtlibv12.exe"
-) else (
-    set "regtlibPath=C:\Windows\Microsoft.NET\Framework\v4.0.30319\regtlibv12.exe"
-)
-
-REM Verificar existencia de regtlibv12.exe
-if not exist "%regtlibPath%" (
-    echo ERROR: No se encontro regtlibv12.exe en "%regtlibPath%"
-    pause
-    exit /b
-)
-
-echo.
-echo Seleccione una opcion:
-echo 1 - Registrar TLB
-echo 2 - Desregistrar TLB
-set /p "opcion=Ingrese opcion (1 o 2): "
-
-if "%opcion%"=="1" (
-    echo Registrando libreria de tipos...
-    "%regtlibPath%" "%tlbPath%"
-    echo Registro completado.
-) else if "%opcion%"=="2" (
-    echo Desregistrando libreria de tipos...
-    "%regtlibPath%" /u "%tlbPath%"
-    echo Desregistro completado.
-) else (
-    echo Opcion invalida.
-)
-
-echo.
-pause
-
-
-Detecta la arquitectura del sistema (x86 / x64) y utiliza la versión correcta de regtlibv12.exe.
-Permite registrar o desregistrar la librería de tipos necesaria para conectarse al servidor DCOM remoto.
-
-Archivos requeridos en la misma carpeta
-Para que el Cliente DCOM funcione correctamente, la carpeta debe contener:
-- AppCliente.exe → Ejecutable del cliente
-- Params.ini → Configuración de conexión a servidor DCOM y Web API
-- RegistrarTLB.bat → Script para registrar/desregistrar la librería de tipos
-- ServidorDatos.tlb → Librería de tipos DCOM
-- libpq.dll → Librería de PostgreSQL
-- midas.dll → Librería de soporte Delphi/C++ Builder
-- regtlibv12.exe → Utilidad para registrar la TLB (si no está en el sistema, el script indica la ruta correcta)
-
-**Información de despliegue y conexión del servidor .NET y cliente Delphi**
-**1. Publicación del servidor .NET**
-
-Los archivos publicados del proyecto .NET Server WebAPI deben copiarse en la carpeta:
-NetServerWebAPI
-
-Dentro de esta carpeta se encuentra el ejecutable principal:
-WebNetAPI.exe
-
-Este ejecutable es el que debe ejecutarse en el PC Servidor para levantar la API.
-El servicio se expone por HTTP en el puerto 8084.
-Ejemplo de URL base:
-
-http://<IP_Servidor>:8084/
-
-**2. Conexión desde el cliente Delphi 2007**
-El cliente desarrollado en Delphi 2007 (D2007) requiere conocer la URL base del servicio para poder consumir la API.
-La URL se debe parametrizar en el archivo de configuración:
-
-params.ini
-
-Ejemplo de configuración en params.ini:
-
-[Servidor]
-URL=http://192.168.1.100:8084
-
-**3. Restricciones de Delphi con HTTPS**
-
-Delphi 2007 tiene limitaciones al consumir servicios bajo HTTPS (TLS/SSL) debido a:
-- Falta de soporte nativo para protocolos modernos de seguridad (TLS 1.2/1.3).
-- Dependencia de librerías antiguas (WinInet/Indy) que no soportan certificados actuales sin modificaciones adicionales.
-- Problemas de compatibilidad con certificados autofirmados o no reconocidos.
-- Por esta razón, el cliente se conecta usando HTTP (puerto 8084) en lugar de HTTPS.
-
-4. Consideraciones adicionales
-Si en un futuro se requiere migrar a HTTPS, se deberán evaluar opciones como:
-- Actualizar las librerías de red en Delphi (ej. Indy actualizadas).
-- Usar un proxy inverso (NGINX, Apache o IIS) que exponga el servicio en HTTPS y mantenga comunicación HTTP interna con el servidor .NET en puerto 8084.
-- Migrar el cliente Delphi a una versión más reciente con soporte TLS moderno.
-
+---
 
 
